@@ -4,6 +4,7 @@ description = "Async client to search and download Guitar Pro tabs from gprotab.
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 keywords = ["guitar", "tabs", "guitar-pro", "scraper"]
 
 [features]

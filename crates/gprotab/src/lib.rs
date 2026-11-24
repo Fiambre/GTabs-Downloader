@@ -122,8 +122,15 @@ impl Client {
     }
 
     pub fn with_base(base: &str) -> Self {
-        let http = reqwest::Client::builder().user_agent(UA).build().expect("cliente http");
-        Self { http, base: base.trim_end_matches('/').to_string(), delay: Duration::from_millis(250) }
+        let http = reqwest::Client::builder()
+            .user_agent(UA)
+            .build()
+            .expect("cliente http");
+        Self {
+            http,
+            base: base.trim_end_matches('/').to_string(),
+            delay: Duration::from_millis(250),
+        }
     }
 
     /// Pausa que se espera antes de cada petición de `download_many` y de la
@@ -134,7 +141,14 @@ impl Client {
     }
 
     async fn get_text(&self, url: &str) -> Result<String> {
-        Ok(self.http.get(url).send().await?.error_for_status()?.text().await?)
+        Ok(self
+            .http
+            .get(url)
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await?)
     }
 
     fn search_url(&self, kind: &str, q: &str, page: u32) -> Result<Url> {
@@ -142,18 +156,25 @@ impl Client {
         if page > 1 {
             params.push(("page", page.to_string()));
         }
-        Ok(Url::parse_with_params(&format!("{}/en/search", self.base), &params)?)
+        Ok(Url::parse_with_params(
+            &format!("{}/en/search", self.base),
+            &params,
+        )?)
     }
 
     /// Una página de resultados de artistas (`page` empieza en 1).
     pub async fn search_artists_page(&self, q: &str, page: u32) -> Result<Page<Artist>> {
-        let body = self.get_text(self.search_url("artist", q, page)?.as_str()).await?;
+        let body = self
+            .get_text(self.search_url("artist", q, page)?.as_str())
+            .await?;
         Ok(parse_artists(&body, page))
     }
 
     /// Una página de resultados de canciones (`page` empieza en 1).
     pub async fn search_songs_page(&self, q: &str, page: u32) -> Result<Page<Tab>> {
-        let body = self.get_text(self.search_url("song", q, page)?.as_str()).await?;
+        let body = self
+            .get_text(self.search_url("song", q, page)?.as_str())
+            .await?;
         Ok(parse_songs(&body, page))
     }
 
@@ -191,7 +212,9 @@ impl Client {
 
     /// Lista todos los tabs de un artista (por slug, ej. `nirvana`).
     pub async fn artist_tabs(&self, artist_slug: &str) -> Result<Vec<Tab>> {
-        let body = self.get_text(&format!("{}/en/tabs/{artist_slug}", self.base)).await?;
+        let body = self
+            .get_text(&format!("{}/en/tabs/{artist_slug}", self.base))
+            .await?;
         Ok(parse_artist_tabs(&body, artist_slug))
     }
 
@@ -199,7 +222,8 @@ impl Client {
     pub async fn tab_info(&self, tab: &Tab) -> Result<TabInfo> {
         let url = tab.page_url().replacen(BASE, &self.base, 1);
         let body = self.get_text(&url).await?;
-        parse_tab_info(&body).ok_or_else(|| Error::Parse(format!("no se encontró la tabla de datos en {url}")))
+        parse_tab_info(&body)
+            .ok_or_else(|| Error::Parse(format!("no se encontró la tabla de datos en {url}")))
     }
 
     /// Descarga el tab dentro de `dir` y devuelve la ruta escrita.
@@ -256,10 +280,16 @@ fn parse_artists(body: &str, page: u32) -> Page<Artist> {
         .select(&s)
         .filter_map(|a| {
             let slug = slug_after(a.value().attr("href")?, "/tabs/")?;
-            Some(Artist { name: text(&a), slug })
+            Some(Artist {
+                name: text(&a),
+                slug,
+            })
         })
         .collect();
-    Page { items, has_next: has_next(&doc, page) }
+    Page {
+        items,
+        has_next: has_next(&doc, page),
+    }
 }
 
 fn parse_songs(body: &str, page: u32) -> Page<Tab> {
@@ -271,12 +301,23 @@ fn parse_songs(body: &str, page: u32) -> Page<Tab> {
             continue;
         };
         let artist_slug = b.value().attr("href").and_then(|h| slug_after(h, "/tabs/"));
-        let slug = n.value().attr("href").and_then(|h| h.rsplit('/').next().map(str::to_string));
+        let slug = n
+            .value()
+            .attr("href")
+            .and_then(|h| h.rsplit('/').next().map(str::to_string));
         if let (Some(artist_slug), Some(slug)) = (artist_slug, slug) {
-            items.push(Tab { artist: text(&b), artist_slug, title: text(&n), slug });
+            items.push(Tab {
+                artist: text(&b),
+                artist_slug,
+                title: text(&n),
+                slug,
+            });
         }
     }
-    Page { items, has_next: has_next(&doc, page) }
+    Page {
+        items,
+        has_next: has_next(&doc, page),
+    }
 }
 
 fn parse_artist_tabs(body: &str, artist_slug: &str) -> Vec<Tab> {
@@ -290,7 +331,12 @@ fn parse_artist_tabs(body: &str, artist_slug: &str) -> Vec<Tab> {
     doc.select(&sel("ul.tabs li a"))
         .filter_map(|a| {
             let slug = a.value().attr("href")?.strip_prefix(&prefix)?.to_string();
-            Some(Tab { artist: artist.clone(), artist_slug: artist_slug.to_string(), title: text(&a), slug })
+            Some(Tab {
+                artist: artist.clone(),
+                artist_slug: artist_slug.to_string(),
+                title: text(&a),
+                slug,
+            })
         })
         .collect()
 }
@@ -351,7 +397,13 @@ fn filename_from_disposition(v: &str) -> Option<String> {
 /// Evita path traversal y caracteres inválidos en Windows.
 fn sanitize(name: &str) -> String {
     name.chars()
-        .map(|c| if matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') { '_' } else { c })
+        .map(|c| {
+            if matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') {
+                '_'
+            } else {
+                c
+            }
+        })
         .collect()
 }
 
@@ -362,15 +414,22 @@ mod tests {
     #[test]
     fn disposition() {
         assert_eq!(
-            filename_from_disposition(r#"attachment; filename="nirvana-new_wave_polly.gpx""#).as_deref(),
+            filename_from_disposition(r#"attachment; filename="nirvana-new_wave_polly.gpx""#)
+                .as_deref(),
             Some("nirvana-new_wave_polly.gpx")
         );
     }
 
     #[test]
     fn slugs() {
-        assert_eq!(slug_after("/en/tabs/nirvana", "/tabs/").as_deref(), Some("nirvana"));
-        assert_eq!(slug_after("/en/tabs/nirvana/polly", "/tabs/").as_deref(), Some("nirvana"));
+        assert_eq!(
+            slug_after("/en/tabs/nirvana", "/tabs/").as_deref(),
+            Some("nirvana")
+        );
+        assert_eq!(
+            slug_after("/en/tabs/nirvana/polly", "/tabs/").as_deref(),
+            Some("nirvana")
+        );
     }
 
     #[test]

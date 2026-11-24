@@ -31,8 +31,18 @@ async fn main() -> gprotab::Result<()> {
             }
         }
         ["info", art, song] => println!("{:#?}", c.tab_info(&Tab::from_slugs(art, song)).await?),
-        ["get", art, song] => println!("{}", c.download(&Tab::from_slugs(art, song), ".").await?.display()),
-        ["get", art, song, dir] => println!("{}", c.download(&Tab::from_slugs(art, song), dir).await?.display()),
+        ["get", art, song] => println!(
+            "{}",
+            c.download(&Tab::from_slugs(art, song), ".")
+                .await?
+                .display()
+        ),
+        ["get", art, song, dir] => println!(
+            "{}",
+            c.download(&Tab::from_slugs(art, song), dir)
+                .await?
+                .display()
+        ),
         ["get-all", art, rest @ ..] => {
             let dir = rest.first().copied().unwrap_or(art);
             let conc = rest.get(1).map_or(4, |s| n(s, 4)) as usize;
