@@ -1,0 +1,14 @@
+[package]
+name = "gprotab-cli"
+description = "CLI to search and download Guitar Pro tabs from gprotab.net"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "gprotab"
+path = "src/main.rs"
+
+[dependencies]
+gprotab = { path = "../gprotab" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

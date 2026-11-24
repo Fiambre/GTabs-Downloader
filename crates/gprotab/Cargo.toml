@@ -1,0 +1,23 @@
+[package]
+name = "gprotab"
+description = "Async client to search and download Guitar Pro tabs from gprotab.net"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+keywords = ["guitar", "tabs", "guitar-pro", "scraper"]
+
+[features]
+# Deriva Serialize/Deserialize en los tipos públicos.
+serde = ["dep:serde"]
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "gzip"] }
+tokio = { version = "1", features = ["time", "fs"] }
+futures = "0.3"
+scraper = "0.20"
+thiserror = "1"
+url = "2"
+serde = { version = "1", features = ["derive"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
