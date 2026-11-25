@@ -1,5 +1,3 @@
-mod plugin;
-
 use gprotab::{Client, Tab};
 
 fn usage() -> ! {
@@ -14,12 +12,10 @@ async fn main() -> gprotab::Result<()> {
     let a: Vec<String> = std::env::args().skip(1).collect();
     if a.first().map(String::as_str) == Some("plugin") {
         let rest: Vec<&str> = a[1..].iter().map(String::as_str).collect();
-        match plugin::run(&rest).await {
-            Ok(v) => println!("{v}"),
-            Err(e) => {
-                println!("{}", serde_json::json!({ "error": e }));
-                std::process::exit(1);
-            }
+        let (line, ok) = gprotab::plugin::run_json(&rest).await;
+        println!("{line}");
+        if !ok {
+            std::process::exit(1);
         }
         return Ok(());
     }

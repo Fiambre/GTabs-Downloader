@@ -24,6 +24,9 @@
 //! - Tab:       `GET /en/tabs/{artist}/{song}`     (metadatos)
 //! - Descarga:  `GET /en/tabs/{artist}/{song}?download` (attachment, nombre en Content-Disposition)
 
+#[cfg(feature = "plugin")]
+pub mod plugin;
+
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 

@@ -10,6 +10,8 @@ keywords = ["guitar", "tabs", "guitar-pro", "scraper"]
 [features]
 # Deriva Serialize/Deserialize en los tipos públicos.
 serde = ["dep:serde"]
+# Órdenes JSON para aplicaciones que usan esto como complemento (`gprotab::plugin`).
+plugin = ["dep:serde_json"]
 
 [dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "gzip"] }
@@ -19,6 +21,7 @@ scraper = "0.20"
 thiserror = "1"
 url = "2"
 serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

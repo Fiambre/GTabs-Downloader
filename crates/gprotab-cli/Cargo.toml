@@ -11,6 +11,5 @@ name = "gprotab"
 path = "src/main.rs"
 
 [dependencies]
-gprotab = { version = "0.1.0", path = "../gprotab" }
-serde_json = "1"
+gprotab = { version = "0.1.0", path = "../gprotab", features = ["plugin"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

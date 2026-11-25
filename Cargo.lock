@@ -387,6 +387,7 @@ dependencies = [
  "reqwest",
  "scraper",
  "serde",
+ "serde_json",
  "thiserror 1.0.69",
  "tokio",
  "url",
@@ -397,7 +398,6 @@ name = "gprotab-cli"
 version = "0.1.0"
 dependencies = [
  "gprotab",
- "serde_json",
  "tokio",
 ]
 

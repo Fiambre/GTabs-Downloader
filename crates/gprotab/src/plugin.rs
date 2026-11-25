@@ -9,10 +9,18 @@
 //!
 //! `id` es `artista/cancion` (los slugs del sitio). `pagina` empieza en 1.
 
-use gprotab::{Client, Tab};
+use crate::{Client, Tab};
 use serde_json::{json, Value};
 
 pub const PROTOCOL: u32 = 1;
+
+/// Ejecuta una orden y devuelve la línea JSON a mostrar y si salió bien (`false` = es `{"error":...}`).
+pub async fn run_json(args: &[&str]) -> (String, bool) {
+    match run(args).await {
+        Ok(v) => (v.to_string(), true),
+        Err(e) => (json!({ "error": e }).to_string(), false),
+    }
+}
 
 /// Ejecuta una orden del plugin y devuelve el JSON a imprimir (`Err` = mensaje de error).
 pub async fn run(args: &[&str]) -> Result<Value, String> {
