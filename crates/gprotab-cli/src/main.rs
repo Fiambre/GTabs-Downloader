@@ -1,8 +1,10 @@
+mod plugin;
+
 use gprotab::{Client, Tab};
 
 fn usage() -> ! {
     eprintln!(
-        "uso:\n  gprotab artist <nombre> [paginas=1]\n  gprotab song <titulo> [paginas=1]\n  gprotab tabs <artist-slug>\n  gprotab info <artist-slug> <song-slug>\n  gprotab get <artist-slug> <song-slug> [dir]\n  gprotab get-all <artist-slug> [dir] [concurrencia=4]"
+        "uso:\n  gprotab plugin info|search|download ... (modo JSON para otras aplicaciones, ver plugin.rs)\n  gprotab artist <nombre> [paginas=1]\n  gprotab song <titulo> [paginas=1]\n  gprotab tabs <artist-slug>\n  gprotab info <artist-slug> <song-slug>\n  gprotab get <artist-slug> <song-slug> [dir]\n  gprotab get-all <artist-slug> [dir] [concurrencia=4]"
     );
     std::process::exit(2)
 }
@@ -10,6 +12,17 @@ fn usage() -> ! {
 #[tokio::main]
 async fn main() -> gprotab::Result<()> {
     let a: Vec<String> = std::env::args().skip(1).collect();
+    if a.first().map(String::as_str) == Some("plugin") {
+        let rest: Vec<&str> = a[1..].iter().map(String::as_str).collect();
+        match plugin::run(&rest).await {
+            Ok(v) => println!("{v}"),
+            Err(e) => {
+                println!("{}", serde_json::json!({ "error": e }));
+                std::process::exit(1);
+            }
+        }
+        return Ok(());
+    }
     let c = Client::new();
     let n = |s: &str, d: u32| s.parse().unwrap_or(d);
     match a.iter().map(String::as_str).collect::<Vec<_>>().as_slice() {
