@@ -124,6 +124,7 @@ impl Client {
     pub fn with_base(base: &str) -> Self {
         let http = reqwest::Client::builder()
             .user_agent(UA)
+            .timeout(Duration::from_secs(30))
             .build()
             .expect("cliente http");
         Self {
