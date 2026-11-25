@@ -24,8 +24,15 @@ pub async fn run(args: &[&str]) -> Result<Value, String> {
             "site": "gprotab.net",
         })),
         ["search", q, rest @ ..] => {
-            let page = rest.first().and_then(|s| s.parse().ok()).unwrap_or(1u32).max(1);
-            let p = Client::new().search_songs_page(q, page).await.map_err(|e| e.to_string())?;
+            let page = rest
+                .first()
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(1u32)
+                .max(1);
+            let p = Client::new()
+                .search_songs_page(q, page)
+                .await
+                .map_err(|e| e.to_string())?;
             let results: Vec<Value> = p
                 .items
                 .iter()
@@ -41,7 +48,10 @@ pub async fn run(args: &[&str]) -> Result<Value, String> {
                 .map_err(|e| e.to_string())?;
             Ok(json!({ "path": path.to_string_lossy() }))
         }
-        _ => Err("uso: plugin info | plugin search <texto> [pagina] | plugin download <id> <carpeta>".into()),
+        _ => Err(
+            "uso: plugin info | plugin search <texto> [pagina] | plugin download <id> <carpeta>"
+                .into(),
+        ),
     }
 }
 
